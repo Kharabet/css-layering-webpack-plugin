@@ -1,26 +1,26 @@
 {
   "name": "css-layering-webpack-plugin",
-  "main": "index.js",
-  "devDependencies": {
-    "webpack": "5.97.1"
-  },
-  "dependencies": {
-    "minimatch": "10.0.1"
-  },
-  "peerDependencies": {
-    "webpack": ">=5.94.0",
-    "html-webpack-plugin": ">=5.6.0"
-  },
-  "description": "Wrap CSS in cascade layers.",
-  "version": "0.2.0",
+  "version": "0.3.0",
+  "description": "A Webpack plugin for wrapping CSS in cascade layers.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "engines": {
     "node": ">=18.0.0"
   },
-  "keywords": ["webpack", "plugin", "css", "layers"],
-  "files": [
-    "index.js",
-    "loader.js"
+  "keywords": [
+    "webpack",
+    "plugin",
+    "css",
+    "layers",
+    "typescript"
   ],
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kburich/css-layering-webpack-plugin.git"
@@ -30,5 +30,18 @@
   "bugs": {
     "url": "https://github.com/kburich/css-layering-webpack-plugin/issues"
   },
-  "homepage": "https://github.com/kburich/css-layering-webpack-plugin#readme"
+  "homepage": "https://github.com/kburich/css-layering-webpack-plugin#readme",
+  "dependencies": {
+    "minimatch": "^10.0.1"
+  },
+  "peerDependencies": {
+    "html-webpack-plugin": ">=5.6.0",
+    "webpack": ">=5.94.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "@types/node": "^18.17.0",
+    "@types/webpack": "^5.87.0",
+    "webpack": "^5.97.1"
+  }
 }

@@ -1,9 +1,8 @@
-/* eslint @typescript-eslint/no-var-requires: "off" */
-const path = require("path");
-const { Compilation, sources, validateSchema } = require("webpack");
-const {
-  OPTIONS_SCHEMA: LOADER_OPTIONS_SCHEMA,
-} = require("./loader");
+import path from "path";
+import { Compilation, Compiler, sources, validateSchema } from "webpack";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import { OPTIONS_SCHEMA as LOADER_OPTIONS_SCHEMA } from "./loader";
+import { type Schema } from "schema-utils/declarations/validate";
 
 const LAYER_ASSET_PATH = "/static/css/layers.css";
 const PLUGIN_NAME = "CssLayeringPlugin";
@@ -28,27 +27,27 @@ const OPTIONS_SCHEMA = {
       enum: ["link", "style", "none"],
     },
   },
-};
+} as Schema;
 
-/**
- * @typedef {Object} Layer
- * @property {string} path
- * @property {string} name
- */
+export interface Layer {
+  path?: string;
+  name: string;
+}
 
-/**
- * @typedef {Object} Options
- * @property {Layer[]} layers
- * @property {string} nonce
- * @property {"link"|"style"} injectOrderAs
- * @property {string} publicPath
- */
+export interface Options {
+  layers: Layer[];
+  nonce?: string;
+  injectOrderAs?: "link" | "style" | "none";
+  publicPath?: string;
+}
 
-class CSSLayeringPlugin {
-  /**
-   * @param {Options} options
-   */
-  constructor(options) {
+export class CSSLayeringPlugin {
+  private layers: Layer[];
+  private nonce?: string;
+  private injectOrderAs: "link" | "style" | "none";
+  private linkHref: string;
+
+  constructor(options: Options) {
     validateSchema(OPTIONS_SCHEMA, options, { name: PLUGIN_NAME });
     this.layers = options.layers;
     this.nonce = options.nonce;
@@ -56,14 +55,12 @@ class CSSLayeringPlugin {
     this.linkHref = path.join(options.publicPath ?? "", LAYER_ASSET_PATH);
   }
 
-  getOrderDeclaration() {
+  private getOrderDeclaration(): string {
     const order = this.layers.map((layer) => layer.name).join(", ");
     return `@layer ${order};`;
   }
 
-  injectOrder(compilation) {
-    const HtmlWebpackPlugin = require("html-webpack-plugin");
-
+  private injectOrder(compilation: Compilation): void {
     HtmlWebpackPlugin.getHooks(compilation).beforeEmit.tapAsync(
       PLUGIN_NAME,
       (data, cb) => {
@@ -81,7 +78,7 @@ class CSSLayeringPlugin {
     );
   }
 
-  emitLinkAsset(compilation) {
+  private emitLinkAsset(compilation: Compilation): void {
     compilation.hooks.processAssets.tap(
       {
         name: PLUGIN_NAME,
@@ -94,7 +91,7 @@ class CSSLayeringPlugin {
     );
   }
 
-  addLayeringLoader(compiler) {
+  private addLayeringLoader(compiler: Compiler): void {
     compiler.hooks.afterEnvironment.tap(PLUGIN_NAME, () => {
       const layeringLoaderRule = {
         test: /\.(sa|sc|c)ss$/,
@@ -109,7 +106,7 @@ class CSSLayeringPlugin {
     });
   }
 
-  apply(compiler) {
+  apply(compiler: Compiler): void {
     this.addLayeringLoader(compiler);
 
     if (this.injectOrderAs !== "none") {
@@ -123,4 +120,4 @@ class CSSLayeringPlugin {
   }
 }
 
-module.exports = CSSLayeringPlugin;
+export default CSSLayeringPlugin;
