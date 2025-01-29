@@ -1,6 +1,6 @@
 {
   "name": "css-layering-webpack-plugin",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A Webpack plugin for wrapping CSS in cascade layers.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
