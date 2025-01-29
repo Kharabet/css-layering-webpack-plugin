@@ -45,19 +45,25 @@ export default function (
   validate(OPTIONS_SCHEMA, options, { name: "CSS Layering Loader" });
 
   const layersWithPaths = options.layers.filter((layer) => layer.path);
-
+  const layers = `@layer ${options.layers
+    .map((layer) => layer.name)
+    .join(", ")};`;
   for (const layer of layersWithPaths) {
     const { path, name } = layer;
 
     if (path && minimatch(this.resourcePath, path)) {
-      return wrapSourceInLayer(source, name);
+      return wrapSourceInLayer(source, name, layers);
     }
   }
 
   return source;
 }
 
-function wrapSourceInLayer(source: string, layerName: string): string {
+function wrapSourceInLayer(
+  source: string,
+  layerName: string,
+  layers: string
+): string {
   const lines = source.split("\n");
 
   const useLines = lines.filter((line) => line.trim().startsWith("@use"));
@@ -66,5 +72,5 @@ function wrapSourceInLayer(source: string, layerName: string): string {
   const useLinesString = useLines.join("\n");
   const otherLinesString = otherLines.join("\n");
 
-  return `${useLinesString}\n@layer ${layerName} {\n${otherLinesString}\n}`;
+  return `${useLinesString}\n${layers}\n@layer ${layerName} {\n${otherLinesString}\n}`;
 }

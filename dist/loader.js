@@ -31,19 +31,22 @@ function default_1(source) {
     const options = this.getOptions();
     (0, schema_utils_1.validate)(exports.OPTIONS_SCHEMA, options, { name: "CSS Layering Loader" });
     const layersWithPaths = options.layers.filter((layer) => layer.path);
+    const layers = `@layer ${options.layers
+        .map((layer) => layer.name)
+        .join(", ")};`;
     for (const layer of layersWithPaths) {
         const { path, name } = layer;
         if (path && (0, minimatch_1.minimatch)(this.resourcePath, path)) {
-            return wrapSourceInLayer(source, name);
+            return wrapSourceInLayer(source, name, layers);
         }
     }
     return source;
 }
-function wrapSourceInLayer(source, layerName) {
+function wrapSourceInLayer(source, layerName, layers) {
     const lines = source.split("\n");
     const useLines = lines.filter((line) => line.trim().startsWith("@use"));
     const otherLines = lines.filter((line) => !line.trim().startsWith("@use"));
     const useLinesString = useLines.join("\n");
     const otherLinesString = otherLines.join("\n");
-    return `${useLinesString}\n@layer ${layerName} {\n${otherLinesString}\n}`;
+    return `${useLinesString}\n${layers}\n@layer ${layerName} {\n${otherLinesString}\n}`;
 }
